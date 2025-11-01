@@ -15,6 +15,8 @@ export default function TodoList() {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState<string>("");
 
   // Fetch todos from the server API. Server is considered the
   // authoritative source for the current dev session.
@@ -124,6 +126,37 @@ export default function TodoList() {
     }
   }
 
+  // Begin inline edit
+  function startEdit(todo: Todo) {
+    setEditingId(todo.id);
+    setEditingText(todo.text);
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditingText("");
+  }
+
+  async function saveEdit(id: string) {
+    const prev = todos;
+    setTodos((t) => t.map((x) => (x.id === id ? { ...x, text: editingText } : x)));
+    setEditingId(null);
+    setEditingText("");
+    try {
+      const res = await fetch(`/api/todos/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: editingText }),
+      });
+      if (!res.ok) throw new Error("update failed");
+    } catch (err) {
+      console.error("Failed to save todo", err);
+      setTodos(prev);
+      setError("Failed to save changes");
+      window.setTimeout(() => setError(null), 5000);
+    }
+  }
+
   return (
     <div className="w-full">
       {error && (
@@ -155,21 +188,59 @@ export default function TodoList() {
               key={todo.id}
               className="flex items-center justify-between rounded border p-3"
             >
-              <label className="flex items-center gap-3">
+              <div className="flex items-center gap-3">
                 <input
                   type="checkbox"
                   checked={todo.completed}
                   onChange={() => toggle(todo)}
                 />
-                <span className={"select-none " + (todo.completed ? "line-through text-zinc-500" : "")}>{todo.text}</span>
-              </label>
-              <div>
-                <button
-                  onClick={() => remove(todo.id)}
-                  className="rounded bg-red-500 px-3 py-1 text-white"
-                >
-                  Delete
-                </button>
+                {editingId === todo.id ? (
+                  <input
+                    className="rounded border px-2 py-1"
+                    value={editingText}
+                    onChange={(e) => setEditingText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") saveEdit(todo.id);
+                      if (e.key === "Escape") cancelEdit();
+                    }}
+                    autoFocus
+                  />
+                ) : (
+                  <span className={"select-none " + (todo.completed ? "line-through text-zinc-500" : "")}>{todo.text}</span>
+                )}
+              </div>
+              <div className="flex gap-2">
+                {editingId === todo.id ? (
+                  <>
+                    <button
+                      onClick={() => saveEdit(todo.id)}
+                      className="rounded bg-emerald-600 px-3 py-1 text-white"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={cancelEdit}
+                      className="rounded border px-3 py-1"
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => startEdit(todo)}
+                      className="rounded border px-3 py-1"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => remove(todo.id)}
+                      className="rounded bg-red-500 px-3 py-1 text-white"
+                    >
+                      Delete
+                    </button>
+                  </>
+                )}
               </div>
             </li>
           ))}
