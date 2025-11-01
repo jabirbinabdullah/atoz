@@ -14,6 +14,7 @@ export default function TodoList() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Fetch todos from the server API. Server is considered the
   // authoritative source for the current dev session.
@@ -66,6 +67,7 @@ export default function TodoList() {
     e?.preventDefault();
     if (!text.trim()) return;
     const optimistic: Todo = { id: Date.now().toString(), text: text.trim(), completed: false };
+    const prev = todos;
     setTodos((t) => [optimistic, ...t]);
     setText("");
     try {
@@ -74,43 +76,62 @@ export default function TodoList() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: optimistic.text }),
       });
+      if (!res.ok) throw new Error("create failed");
       const created = await res.json();
       // Replace optimistic id with server id (if different).
       setTodos((t) => t.map((x) => (x.id === optimistic.id ? created : x)));
     } catch (err) {
-      // On error, we keep optimistic item but you could re-fetch server to reconcile.
       console.error("Failed to create todo", err);
+      // revert optimistic change
+      setTodos(prev);
+      setError("Failed to create todo");
+      window.setTimeout(() => setError(null), 5000);
     }
   }
 
   // Toggle completion: optimistic update then send PUT to server.
   async function toggle(todo: Todo) {
+    const prev = todos;
     const toggled = { ...todo, completed: !todo.completed };
     setTodos((t) => t.map((x) => (x.id === todo.id ? toggled : x)));
     try {
-      await fetch("/api/todos", {
+      const res = await fetch(`/api/todos/${todo.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(toggled),
+        body: JSON.stringify({ completed: toggled.completed }),
       });
+      if (!res.ok) throw new Error("toggle failed");
     } catch (err) {
       console.error("Failed to toggle todo", err);
-      // optional: re-fetch server to reconcile
+      setTodos(prev);
+      setError("Failed to update todo");
+      window.setTimeout(() => setError(null), 5000);
     }
   }
 
   // Remove: optimistic update then call DELETE on the API.
   async function remove(id: string) {
+    const prev = todos;
     setTodos((t) => t.filter((x) => x.id !== id));
     try {
-      await fetch(`/api/todos?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      const res = await fetch(`/api/todos/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("delete failed");
     } catch (err) {
       console.error("Failed to delete todo", err);
+      setTodos(prev);
+      setError("Failed to delete todo");
+      window.setTimeout(() => setError(null), 5000);
     }
   }
 
   return (
     <div className="w-full">
+      {error && (
+        <div className="mb-4 rounded bg-red-100 px-3 py-2 text-red-800">
+          {error}
+        </div>
+      )}
+
       <form onSubmit={addTodo} className="mb-4 flex gap-2">
         <input
           className="flex-1 rounded border px-3 py-2"
