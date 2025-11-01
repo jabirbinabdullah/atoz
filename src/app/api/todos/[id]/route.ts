@@ -1,14 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(_req: Request, context: any) {
-  let id = context?.params?.id;
-  if (!id && context?.params) {
-    try {
-      const p = await context.params;
-      id = p?.id;
-    } catch {}
-  }
+export async function GET(_req: Request, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
   try {
     if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
     const todo = await prisma.todo.findUnique({ where: { id } });
@@ -19,14 +13,8 @@ export async function GET(_req: Request, context: any) {
   }
 }
 
-export async function PUT(req: Request, context: any) {
-  let id = context?.params?.id;
-  if (!id && context?.params) {
-    try {
-      const p = await context.params;
-      id = p?.id;
-    } catch {}
-  }
+export async function PUT(req: Request, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
   try {
     if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
     const body = await req.json().catch(() => ({}));
@@ -44,14 +32,8 @@ export async function PUT(req: Request, context: any) {
   }
 }
 
-export async function DELETE(_req: Request, context: any) {
-  let id = context?.params?.id;
-  if (!id && context?.params) {
-    try {
-      const p = await context.params;
-      id = p?.id;
-    } catch {}
-  }
+export async function DELETE(_req: Request, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
   try {
     if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
     const exists = await prisma.todo.findUnique({ where: { id } });
