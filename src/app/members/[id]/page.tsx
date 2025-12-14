@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -71,11 +71,7 @@ export default function MemberDetailPage({ params }: { params: { id: string } })
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState<Partial<Member>>({})
 
-  useEffect(() => {
-    fetchMember()
-  }, [params.id])
-
-  async function fetchMember() {
+  const fetchMember = useCallback(async () => {
     try {
       const res = await fetch(`/api/members/${params.id}`)
       if (!res.ok) {
@@ -93,12 +89,16 @@ export default function MemberDetailPage({ params }: { params: { id: string } })
       const data = await res.json()
       setMember(data)
       setFormData(data)
-    } catch (e) {
+    } catch {
       setError('Terjadi kesalahan')
     } finally {
       setLoading(false)
     }
-  }
+  }, [params.id, router])
+
+  useEffect(() => {
+    fetchMember()
+  }, [fetchMember])
 
   async function handleSave() {
     try {
@@ -131,7 +131,7 @@ export default function MemberDetailPage({ params }: { params: { id: string } })
       setMember(updated)
       setIsEditing(false)
       alert('Berhasil diperbarui')
-    } catch (e) {
+    } catch {
       alert('Terjadi kesalahan')
     }
   }
@@ -154,7 +154,7 @@ export default function MemberDetailPage({ params }: { params: { id: string } })
 
       alert('Berhasil dihapus')
       router.push('/members')
-    } catch (e) {
+    } catch {
       alert('Terjadi kesalahan')
     }
   }
