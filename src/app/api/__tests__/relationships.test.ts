@@ -31,11 +31,16 @@ jest.mock('../../../lib/prisma', () => {
     default: {
       parentChild: {
         create: jest.fn(),
+        findUnique: jest.fn(),
         delete: jest.fn(),
       },
       marriage: {
         create: jest.fn(),
+        findUnique: jest.fn(),
         delete: jest.fn(),
+      },
+      activity: {
+        create: jest.fn(),
       },
     },
   }
@@ -68,24 +73,42 @@ describe('relationships API', () => {
   })
 
   it('creates parent-child', async () => {
-    prismaMock.parentChild.create.mockResolvedValue({ id: 'pc1', parentId: 'p', childId: 'c' })
+    prismaMock.parentChild.create.mockResolvedValue({
+      id: 'pc1',
+      parentId: 'p',
+      childId: 'c',
+      parent: { fullName: 'Parent Name' },
+      child: { fullName: 'Child Name' },
+    } as any)
 
     const res = await createParentChild(makeReq({ parentId: 'p', childId: 'c', parentRole: 'father' }))
     const json = await res.json()
 
     expect(prismaMock.parentChild.create).toHaveBeenCalledWith({
       data: { parentId: 'p', childId: 'c', parentRole: 'father' },
+      include: {
+        parent: { select: { fullName: true } },
+        child: { select: { fullName: true } },
+      },
     })
     expect(res.status).toBe(201)
     expect(json.id).toBe('pc1')
   })
 
   it('deletes parent-child', async () => {
-    prismaMock.parentChild.delete.mockResolvedValue({})
+    prismaMock.parentChild.findUnique.mockResolvedValue({
+      id: 'pc1',
+      parentId: 'p',
+      childId: 'c',
+      parent: { fullName: 'Parent Name' },
+      child: { fullName: 'Child Name' },
+    } as any)
+    prismaMock.parentChild.delete.mockResolvedValue({} as any)
 
     const res = await deleteParentChild(makeReq({ parentId: 'p', childId: 'c' }))
     const json = await res.json()
 
+    expect(prismaMock.parentChild.findUnique).toHaveBeenCalled()
     expect(prismaMock.parentChild.delete).toHaveBeenCalledWith({
       where: { parentId_childId: { parentId: 'p', childId: 'c' } },
     })
@@ -102,7 +125,13 @@ describe('relationships API', () => {
   })
 
   it('creates marriage', async () => {
-    prismaMock.marriage.create.mockResolvedValue({ id: 'm1', spouseAId: 'a', spouseBId: 'b' })
+    prismaMock.marriage.create.mockResolvedValue({
+      id: 'm1',
+      spouseAId: 'a',
+      spouseBId: 'b',
+      spouseA: { fullName: 'Spouse A' },
+      spouseB: { fullName: 'Spouse B' },
+    } as any)
 
     const res = await createMarriage(makeReq({ spouseAId: 'a', spouseBId: 'b', notes: 'note' }))
     const json = await res.json()
@@ -115,17 +144,29 @@ describe('relationships API', () => {
         divorceDate: null,
         notes: 'note',
       },
+      include: {
+        spouseA: { select: { fullName: true } },
+        spouseB: { select: { fullName: true } },
+      },
     })
     expect(res.status).toBe(201)
     expect(json.id).toBe('m1')
   })
 
   it('deletes marriage', async () => {
-    prismaMock.marriage.delete.mockResolvedValue({})
+    prismaMock.marriage.findUnique.mockResolvedValue({
+      id: 'm1',
+      spouseAId: 'a',
+      spouseBId: 'b',
+      spouseA: { fullName: 'Spouse A' },
+      spouseB: { fullName: 'Spouse B' },
+    } as any)
+    prismaMock.marriage.delete.mockResolvedValue({} as any)
 
     const res = await deleteMarriage(makeReq({ spouseAId: 'a', spouseBId: 'b' }))
     const json = await res.json()
 
+    expect(prismaMock.marriage.findUnique).toHaveBeenCalled()
     expect(prismaMock.marriage.delete).toHaveBeenCalledWith({
       where: { spouseAId_spouseBId: { spouseAId: 'a', spouseBId: 'b' } },
     })

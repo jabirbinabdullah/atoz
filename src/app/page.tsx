@@ -19,17 +19,30 @@ interface Birthday {
   daysUntil: number
 }
 
+interface Activity {
+  id: string
+  userName: string
+  action: string
+  entityType: string
+  entityId: string | null
+  entityName: string | null
+  details: string | null
+  createdAt: string
+}
+
 export default function Home() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [birthdays, setBirthdays] = useState<Birthday[]>([])
+  const [activities, setActivities] = useState<Activity[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function fetchDashboardData() {
       try {
-        const [statsRes, birthdaysRes] = await Promise.all([
+        const [statsRes, birthdaysRes, activitiesRes] = await Promise.all([
           fetch('/api/dashboard/stats'),
           fetch('/api/dashboard/birthdays'),
+          fetch('/api/dashboard/activities?limit=5'),
         ])
 
         if (statsRes.ok) {
@@ -40,6 +53,11 @@ export default function Home() {
         if (birthdaysRes.ok) {
           const birthdaysData = await birthdaysRes.json()
           setBirthdays(birthdaysData.birthdays || [])
+        }
+
+        if (activitiesRes.ok) {
+          const activitiesData = await activitiesRes.json()
+          setActivities(activitiesData.activities || [])
         }
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error)
@@ -59,6 +77,60 @@ export default function Home() {
 
   function formatBirthDate(dateStr: string) {
     const date = new Date(dateStr)
+    return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
+  }
+
+  function getActionEmoji(action: string) {
+    switch (action) {
+      case 'created':
+        return '➕'
+      case 'updated':
+        return '✏️'
+      case 'deleted':
+        return '🗑️'
+      default:
+        return '📝'
+    }
+  }
+
+  function getActionText(action: string) {
+    switch (action) {
+      case 'created':
+        return 'menambahkan'
+      case 'updated':
+        return 'mengedit'
+      case 'deleted':
+        return 'menghapus'
+      default:
+        return 'mengubah'
+    }
+  }
+
+  function getEntityTypeText(entityType: string) {
+    switch (entityType) {
+      case 'member':
+        return 'anggota'
+      case 'relationship':
+        return 'relasi'
+      case 'marriage':
+        return 'pernikahan'
+      default:
+        return entityType
+    }
+  }
+
+  function formatActivityTime(dateStr: string) {
+    const date = new Date(dateStr)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMs / 3600000)
+    const diffDays = Math.floor(diffMs / 86400000)
+
+    if (diffMins < 1) return 'Baru saja'
+    if (diffMins < 60) return `${diffMins} menit lalu`
+    if (diffHours < 24) return `${diffHours} jam lalu`
+    if (diffDays < 7) return `${diffDays} hari lalu`
     return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
   }
 
@@ -110,38 +182,84 @@ export default function Home() {
               </div>
             </div>
 
+            {/* Birthdays Section */}
+            <div className="bg-white rounded-lg shadow mb-8">
+              <div className="p-6 border-b">
+                <h2 className="text-xl font-semibold text-gray-900">🎂 Ulang Tahun Terdekat</h2>
+              </div>
+              <div className="p-6">
+                {birthdays.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {birthdays.slice(0, 6).map((birthday) => (
+                      <Link
+                        key={birthday.id}
+                        href={`/members/${birthday.id}`}
+                        className="flex items-center justify-between p-3 hover:bg-gray-50 rounded border"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-gray-900 truncate">
+                            {birthday.fullName}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            {formatBirthDate(birthday.nextBirthday)}
+                          </div>
+                        </div>
+                        <div className="text-sm font-semibold text-blue-600 ml-2">
+                          {formatDaysUntil(birthday.daysUntil)}
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-4">
+                    Tidak ada ulang tahun dalam 30 hari ke depan
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Activities and Quick Actions Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              {/* Upcoming Birthdays */}
+              {/* Recent Activities */}
               <div className="bg-white rounded-lg shadow">
                 <div className="p-6 border-b">
-                  <h2 className="text-xl font-semibold text-gray-900">🎂 Ulang Tahun Terdekat</h2>
+                  <h2 className="text-xl font-semibold text-gray-900">⚡ Aktivitas Terbaru</h2>
                 </div>
                 <div className="p-6">
-                  {birthdays.length > 0 ? (
+                  {activities.length > 0 ? (
                     <div className="space-y-3">
-                      {birthdays.slice(0, 5).map((birthday) => (
-                        <Link
-                          key={birthday.id}
-                          href={`/members/${birthday.id}`}
-                          className="flex items-center justify-between p-3 hover:bg-gray-50 rounded border"
+                      {activities.map((activity) => (
+                        <div
+                          key={activity.id}
+                          className="flex items-start gap-3 p-3 border rounded hover:bg-gray-50"
                         >
-                          <div>
-                            <div className="font-semibold text-gray-900">
-                              {birthday.fullName}
+                          <div className="text-2xl">{getActionEmoji(activity.action)}</div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm text-gray-900">
+                              <span className="font-semibold">{activity.userName}</span>
+                              {' '}
+                              {getActionText(activity.action)}
+                              {' '}
+                              {getEntityTypeText(activity.entityType)}
+                              {activity.entityName && (
+                                <>
+                                  {' '}
+                                  <span className="font-semibold text-blue-600">
+                                    {activity.entityName}
+                                  </span>
+                                </>
+                              )}
                             </div>
-                            <div className="text-sm text-gray-600">
-                              {formatBirthDate(birthday.nextBirthday)}
+                            <div className="text-xs text-gray-500 mt-1">
+                              {formatActivityTime(activity.createdAt)}
                             </div>
                           </div>
-                          <div className="text-sm font-semibold text-blue-600">
-                            {formatDaysUntil(birthday.daysUntil)}
-                          </div>
-                        </Link>
+                        </div>
                       ))}
                     </div>
                   ) : (
                     <p className="text-gray-500 text-center py-4">
-                      Tidak ada ulang tahun dalam 30 hari ke depan
+                      Belum ada aktivitas terbaru
                     </p>
                   )}
                 </div>

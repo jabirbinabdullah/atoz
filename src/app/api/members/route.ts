@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { authorize } from '@/lib/auth'
+import { logActivity } from '@/lib/activity'
 
 export async function GET(req: Request) {
   const session = await authorize()
@@ -65,6 +66,17 @@ export async function POST(req: Request) {
         createdByUserId: (session as any).user?.id ?? null,
       },
     })
+    
+    // Log activity
+    await logActivity({
+      userId: (session as any).user?.id,
+      userName: (session as any).user?.name || (session as any).user?.email || 'Unknown',
+      action: 'created',
+      entityType: 'member',
+      entityId: member.id,
+      entityName: member.fullName,
+    })
+    
     return NextResponse.json(member, { status: 201 })
   } catch (e) {
     return NextResponse.json({ error: 'Failed to create member' }, { status: 400 })

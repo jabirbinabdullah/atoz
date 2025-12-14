@@ -134,3 +134,18 @@ model Marriage {
 
   @@unique([spouseAId, spouseBId])
 }
+
+model Activity {
+  id          String   @id @default(cuid())
+  userId      String?
+  userName    String
+  action      String   // "created", "updated", "deleted"
+  entityType  String   // "member", "relationship", "marriage"
+  entityId    String?
+  entityName  String?
+  details     String?  // JSON string with additional details
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([entityType])
+}
