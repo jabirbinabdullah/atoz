@@ -152,9 +152,14 @@ export default function MembersPage() {
 
       <ul className="divide-y border rounded">
         {members.map((m) => (
-          <li key={m.id} className="p-3 space-y-1">
+          <li key={m.id} className="p-3 space-y-1 hover:bg-gray-50">
             <div className="flex items-center justify-between">
-              <span className="font-semibold">{m.fullName}</span>
+              <a
+                href={`/members/${m.id}`}
+                className="font-semibold text-blue-600 hover:underline"
+              >
+                {m.fullName}
+              </a>
               <span className="text-sm text-gray-500">{m.isAlive ? 'Hidup' : 'Wafat'}</span>
             </div>
             <div className="text-sm text-gray-600 flex flex-wrap gap-4">
