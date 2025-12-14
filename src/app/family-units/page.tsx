@@ -124,12 +124,20 @@ export default function FamilyUnitsPage() {
                   </p>
                 </div>
                 {familyId && (
-                  <button
-                    onClick={() => setShowWizard(true)}
-                    className="px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 font-bold whitespace-nowrap ml-4"
-                  >
-                    + Buat Keluarga Baru
-                  </button>
+                  <div className="flex gap-3 ml-4">
+                    <Link
+                      href="/import"
+                      className="px-6 py-3 bg-green-600 text-white rounded hover:bg-green-700 font-bold whitespace-nowrap"
+                    >
+                      📥 Import Bagan
+                    </Link>
+                    <button
+                      onClick={() => setShowWizard(true)}
+                      className="px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 font-bold whitespace-nowrap"
+                    >
+                      + Buat Keluarga Baru
+                    </button>
+                  </div>
                 )}
               </div>
             </div>

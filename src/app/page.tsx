@@ -316,23 +316,26 @@ export default function Home() {
                       <div className="text-gray-400">→</div>
                     </Link>
 
+                    <Link
+                      href="/import"
+                      className="flex items-center justify-between p-4 border rounded hover:bg-gray-50 transition"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="text-2xl">📥</div>
+                        <div>
+                          <div className="font-semibold text-gray-900">Import Bagan Silsilah</div>
+                          <div className="text-sm text-gray-600">Import silsilah dari format tree text</div>
+                        </div>
+                      </div>
+                      <div className="text-gray-400">→</div>
+                    </Link>
+
                     <div className="flex items-center justify-between p-4 border rounded bg-gray-50 opacity-50">
                       <div className="flex items-center gap-3">
                         <div className="text-2xl">🌳</div>
                         <div>
                           <div className="font-semibold text-gray-900">Pohon Keluarga</div>
                           <div className="text-sm text-gray-600">Visualisasi pohon keluarga (Coming Soon)</div>
-                        </div>
-                      </div>
-                      <div className="text-gray-400">→</div>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 border rounded bg-gray-50 opacity-50">
-                      <div className="flex items-center gap-3">
-                        <div className="text-2xl">📊</div>
-                        <div>
-                          <div className="font-semibold text-gray-900">Laporan</div>
-                          <div className="text-sm text-gray-600">Export data keluarga (Coming Soon)</div>
                         </div>
                       </div>
                       <div className="text-gray-400">→</div>
