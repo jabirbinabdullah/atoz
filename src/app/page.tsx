@@ -114,60 +114,8 @@ export default function Home() {
         return 'relasi'
       case 'marriage':
         return 'pernikahan'
-      default:
-        return entityType
-    }
-  }
-
-  function formatActivityTime(dateStr: string) {
-    const date = new Date(dateStr)
-    const now = new Date()
-    const diffMs = now.getTime() - date.getTime()
-    const diffMins = Math.floor(diffMs / 60000)
-    const diffHours = Math.floor(diffMs / 3600000)
-    const diffDays = Math.floor(diffMs / 86400000)
-
-    if (diffMins < 1) return 'Baru saja'
-    if (diffMins < 60) return `${diffMins} menit lalu`
-    if (diffHours < 24) return `${diffHours} jam lalu`
-    if (diffDays < 7) return `${diffDays} hari lalu`
-    return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
-  }
-
-  function getActionEmoji(action: string) {
-    switch (action) {
-      case 'created':
-        return '➕'
-      case 'updated':
-        return '✏️'
-      case 'deleted':
-        return '🗑️'
-      default:
-        return '📝'
-    }
-  }
-
-  function getActionText(action: string) {
-    switch (action) {
-      case 'created':
-        return 'menambahkan'
-      case 'updated':
-        return 'mengedit'
-      case 'deleted':
-        return 'menghapus'
-      default:
-        return 'mengubah'
-    }
-  }
-
-  function getEntityTypeText(entityType: string) {
-    switch (entityType) {
-      case 'member':
-        return 'anggota'
-      case 'relationship':
-        return 'relasi'
-      case 'marriage':
-        return 'pernikahan'
+      case 'familyunit':
+        return 'unit keluarga'
       default:
         return entityType
     }
@@ -327,6 +275,20 @@ export default function Home() {
                 <div className="p-6">
                   <div className="grid grid-cols-1 gap-3">
                     <Link
+                      href="/family-units"
+                      className="flex items-center justify-between p-4 border rounded hover:bg-gray-50 transition"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="text-2xl">👨‍👩‍👧‍👦</div>
+                        <div>
+                          <div className="font-semibold text-gray-900">Susunan Keluarga</div>
+                          <div className="text-sm text-gray-600">Kelola unit keluarga inti</div>
+                        </div>
+                      </div>
+                      <div className="text-gray-400">→</div>
+                    </Link>
+
+                    <Link
                       href="/members"
                       className="flex items-center justify-between p-4 border rounded hover:bg-gray-50 transition"
                     >
@@ -384,6 +346,7 @@ export default function Home() {
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
               <h3 className="font-semibold text-blue-900 mb-2">💡 Tips</h3>
               <ul className="text-sm text-blue-800 space-y-1">
+                <li>• <strong>Mulai dengan Susunan Keluarga:</strong> Buat unit keluarga inti (pasangan + anak-anak) untuk struktur silsilah yang terorganisir</li>
                 <li>• Klik pada anggota untuk melihat detail dan relasi keluarga</li>
                 <li>• Gunakan fitur pencarian untuk menemukan anggota dengan cepat</li>
                 <li>• Pastikan mengisi tanggal lahir untuk melihat reminder ulang tahun</li>

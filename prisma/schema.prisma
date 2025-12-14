@@ -68,14 +68,65 @@ model VerificationToken {
 }
 
 // Genealogy models
+// Root family collection (tree)
 model Family {
   id          String   @id @default(cuid())
   name        String
   description String?
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  users   User[]
-  members Member[]
+  users            User[]
+  familyUnits      FamilyUnit[]  @relation("FamilyUnits")
+  members          Member[]
+}
+
+// Family Unit (Nucleus Family) - Core unit with parents and children
+// Represents a couple and their children as a single group node
+model FamilyUnit {
+  id                String   @id @default(cuid())
+  familyId          String
+  family            Family   @relation("FamilyUnits", fields: [familyId], references: [id], onDelete: Cascade)
+  
+  // Core couple
+  fatherId          String?
+  father            Member?  @relation("FamilyUnitAsFather", fields: [fatherId], references: [id], onDelete: SetNull)
+  
+  motherId          String?
+  mother            Member?  @relation("FamilyUnitAsMother", fields: [motherId], references: [id], onDelete: SetNull)
+  
+  // Marriage info
+  marriageId        String?
+  marriage          Marriage? @relation(fields: [marriageId], references: [id], onDelete: SetNull)
+  
+  // Children in this unit
+  children          FamilyUnitMember[] @relation("ChildrenInUnit")
+  
+  // Parent unit (for family tree hierarchy)
+  parentUnitId      String?
+  parentUnit        FamilyUnit? @relation("ParentChildFamilies", fields: [parentUnitId], references: [id], onDelete: SetNull)
+  childUnits        FamilyUnit[] @relation("ParentChildFamilies")
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([familyId])
+  @@index([fatherId])
+  @@index([motherId])
+  @@index([parentUnitId])
+}
+
+// Members in a family unit (for children grouping)
+model FamilyUnitMember {
+  id            String @id @default(cuid())
+  familyUnitId  String
+  familyUnit    FamilyUnit @relation("ChildrenInUnit", fields: [familyUnitId], references: [id], onDelete: Cascade)
+  
+  memberId      String
+  member        Member @relation("FamilyUnitMember", fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([familyUnitId, memberId])
+  @@index([memberId])
 }
 
 model Member {
@@ -98,6 +149,11 @@ model Member {
   createdBy     User?    @relation("CreatedBy", fields: [createdByUserId], references: [id])
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  // Family unit relationships
+  fatherInUnits      FamilyUnit[] @relation("FamilyUnitAsFather")
+  motherInUnits      FamilyUnit[] @relation("FamilyUnitAsMother")
+  familyUnitMemberships FamilyUnitMember[] @relation("FamilyUnitMember")
 
   parents    ParentChild[] @relation("ChildParents")
   children   ParentChild[] @relation("ParentChildren")

@@ -4,7 +4,7 @@ interface LogActivityParams {
   userId?: string
   userName: string
   action: 'created' | 'updated' | 'deleted'
-  entityType: 'member' | 'relationship' | 'marriage'
+  entityType: 'member' | 'relationship' | 'marriage' | 'familyunit'
   entityId?: string
   entityName?: string
   details?: Record<string, any>
