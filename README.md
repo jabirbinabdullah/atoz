@@ -99,10 +99,26 @@ First, run the development server:
 ```bash
 npm run dev
 # or
-yarn dev
-# or
-pnpm dev
-# or
+What's next
+- Add pages, components and a simple API route
+How to set up DB (MongoDB) and sync schema:
+# .env example (MongoDB running locally on default port)
+# DATABASE_URL="mongodb://localhost:27017/atoz"
+
+# Generate Prisma client
+npx prisma generate
+
+# Push schema to MongoDB (Prisma Migrate is not used for MongoDB)
+npx prisma db push
+- Marriages (spouse A–B): `src/app/api/relationships/marriages/route.ts`.
+- Members page: `src/app/members/page.tsx` (list + add).
+
+Prisma schema additions:
+- `Member`, `ParentChild`, `Marriage` with helpful indexes and constraints in `prisma/schema.prisma`.
+
+How to set up DB and migrate:
+```powershell
+# Ensure DATABASE_URL is set (MySQL is configured in prisma/schema.prisma)
 bun dev
 ```
 
@@ -112,6 +128,9 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+
+Try the API locally:
+```powershell
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
