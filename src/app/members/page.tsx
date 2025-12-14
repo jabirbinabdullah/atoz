@@ -33,7 +33,8 @@ export default function MembersPage() {
     if (isAlive !== 'all') params.set('isAlive', String(isAlive === 'true'))
     const res = await fetch(`/api/members?${params.toString()}`)
     const data = await res.json()
-    setMembers(data)
+    // Ensure data is an array
+    setMembers(Array.isArray(data) ? data : [])
   }
 
   useEffect(() => {
