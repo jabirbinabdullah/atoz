@@ -330,16 +330,19 @@ export default function Home() {
                       <div className="text-gray-400">→</div>
                     </Link>
 
-                    <div className="flex items-center justify-between p-4 border rounded bg-gray-50 opacity-50">
+                    <Link
+                      href="/visualize-tree"
+                      className="flex items-center justify-between p-4 border rounded hover:bg-gray-50 transition"
+                    >
                       <div className="flex items-center gap-3">
                         <div className="text-2xl">🌳</div>
                         <div>
                           <div className="font-semibold text-gray-900">Pohon Keluarga</div>
-                          <div className="text-sm text-gray-600">Visualisasi pohon keluarga (Coming Soon)</div>
+                          <div className="text-sm text-gray-600">Visualisasi dan verifikasi pohon silsilah</div>
                         </div>
                       </div>
                       <div className="text-gray-400">→</div>
-                    </div>
+                    </Link>
                   </div>
                 </div>
               </div>

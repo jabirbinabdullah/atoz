@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import TreeVisualizer from '@/components/family/TreeVisualizer';
 
 interface FamilyUnit {
   id: string;
@@ -231,7 +232,7 @@ export default function FamilyUnitDetailPage({ params }: { params: Promise<{ id:
 
           {/* Connected Family Units */}
           {familyUnit.childUnits.length > 0 && (
-            <div className="p-6 border border-gray-300 rounded-lg">
+            <div className="mb-8 p-6 border border-gray-300 rounded-lg">
               <h3 className="text-2xl font-bold mb-4">
                 Keluarga Terhubung ({familyUnit.childUnits.length})
               </h3>
@@ -247,6 +248,25 @@ export default function FamilyUnitDetailPage({ params }: { params: Promise<{ id:
                   >
                     <p className="font-semibold text-gray-900">
                       {unit.father?.fullName || 'N/A'} & {unit.mother?.fullName || 'N/A'}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Tree Visualization */}
+          {resolvedParams?.id && (
+            <div className="mt-12 p-6 border-t-2 border-gray-300 pt-8">
+              <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                🌳 Visualisasi Pohon Silsilah
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Lihat struktur keluarga yang telah diimpor dan verifikasi posisi setiap anggota dalam silsilah.
+              </p>
+              <TreeVisualizer familyUnitId={resolvedParams.id} />
+            </div>
+          )}
                     </p>
                   </Link>
                 ))}
